@@ -35,6 +35,29 @@ function visibleSlots() {
   return state.slots.filter(slot => state.selected.has(slot.venue) && (state.period === "all" || slot.period === state.period));
 }
 
+function mergeAvailabilityRows(rows) {
+  const sorted = [...rows].sort((left,right) =>
+    `${left.date}|${left.facility}|${left.room}|${left.slot_start || ""}`.localeCompare(
+      `${right.date}|${right.facility}|${right.room}|${right.slot_start || ""}`
+    )
+  );
+  const merged = [];
+  for (const row of sorted) {
+    const previous = merged.at(-1);
+    const sameRoom = previous &&
+      previous.date === row.date &&
+      previous.facility === row.facility &&
+      previous.room === row.room &&
+      previous.time_period === row.time_period;
+    if (sameRoom && previous.slot_end && row.slot_start && row.slot_start <= previous.slot_end) {
+      if (row.slot_end > previous.slot_end) previous.slot_end = row.slot_end;
+    } else {
+      merged.push({...row});
+    }
+  }
+  return merged;
+}
+
 function renderPeriods() {
   $("periods").innerHTML = periods.map(([id,label,detail]) =>
     `<button data-period="${id}" class="${state.period === id ? "active" : ""}"><b>${label}</b><small>${detail}</small></button>`
@@ -136,7 +159,7 @@ async function loadMonth() {
     query.append("date",`lt.${next}`);
     const response = await fetch(`${SUPABASE_URL}/rest/v1/edonet_availability?${query}`,{headers});
     if (!response.ok) throw new Error(`SlotDB returned ${response.status}`);
-    const rows = await response.json();
+    const rows = mergeAvailabilityRows(await response.json());
     state.slots = rows.map(row => {
       const venue = venues.find(item=>item.japanese===row.facility);
       return venue ? {
