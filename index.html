@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>Shuttle Spot — Badminton availability</title>
+  <meta name="description" content="Live badminton room availability from Edogawa's public facility reservation system.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div><h1>Shuttle Spot</h1><p>Badminton availability</p></div>
+      <button class="open" id="refresh" aria-label="Request a fresh Edonet scan">↻</button>
+    </header>
+
+    <section class="card venues">
+      <div class="title">
+        <span class="icon">⌖</span>
+        <div><h2>Venues</h2><p id="selected-count">All venues selected</p></div>
+        <button class="manage" id="manage">Manage</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <section class="card time">
+      <div class="time-title"><span class="icon">◷</span><h2>Time</h2></div>
+      <div class="periods" id="periods"></div>
+    </section>
+
+    <section class="card calendar">
+      <div class="cal-head">
+        <button id="previous" aria-label="Previous month">←</button>
+        <h2 id="month-title"></h2>
+        <button id="next" aria-label="Next month">→</button>
+      </div>
+      <div class="grid weekdays"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      <div class="grid" id="days"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <div class="result-title"><h2 id="date-title"></h2><span id="slot-count"></span></div>
+    <section class="slot-list" id="slots"></section>
+    <p class="note" id="status">Loading live availability…</p>
+  </main>
+
+  <div class="backdrop hidden" id="backdrop">
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="venue-dialog-title">
+      <div class="handle"></div>
+      <div class="sheet-head">
+        <div><h2 id="venue-dialog-title">Select venues</h2><p>Choose one, several, or all venues.</p></div>
+        <button id="close" aria-label="Close">×</button>
+      </div>
+      <div class="actions"><button id="select-all">Select all</button><button id="clear">Clear</button></div>
+      <input id="search" type="search" placeholder="Search venues" aria-label="Search venues">
+      <div class="options" id="options"></div>
+      <button class="done" id="done">Show selected venues</button>
+    </section>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
