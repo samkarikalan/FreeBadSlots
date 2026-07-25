@@ -11,7 +11,7 @@ const venues = [
   ["Rinkai-cho","臨海町コミュニティ会館","#1d9bd1"],["Higashi-Kasai","東葛西コミュニティ会館","#c45a7b"],
   ["Nagashima-Kuwagawa","長島桑川コミュニティ会館","#1f8a70"],["Nishi-Koiwa","西小岩コミュニティ会館","#6277d9"],
   ["Kita-Koiwa","北小岩コミュニティ会館","#db6d32"],["Minami-Koiwa","南小岩コミュニティ会館","#769e23"],
-  ["Shinozaki","篠崎コミュニティ会館","#a55bb8"],
+  ["Shinozaki","篠崎コミュニティ会館","#a55bb8"],["Tobu Civic Hall","東部区民館","#0d9488"],
 ].map(([name,japanese,color],id)=>({id,name,japanese,color}));
 const periods = [["all","All","All day"],["am","AM","Morning"],["pm","PM–6","Until 6 PM"],["eve","6–9:30","Evening"]];
 const headers = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
