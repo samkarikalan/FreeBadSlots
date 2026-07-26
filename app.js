@@ -109,12 +109,25 @@ function renderSlots() {
   $("slot-count").textContent = `${slots.length} available slot${slots.length===1?"":"s"}`;
   $("slots").innerHTML = slots.length ? slots.map((slot,index)=>{
     const venue = venues[slot.venue];
+    const booking = encodeURIComponent(JSON.stringify({
+      date: slot.date,
+      facility: venue.japanese,
+      room: slot.room,
+      start: slot.start,
+      end: slot.end,
+    }));
     return `<article style="--v:${venue.color}">
       <i></i><div><h3>${escapeHtml(venue.name)}</h3><p>${escapeHtml(slot.room)}</p></div>
       <strong>${escapeHtml(slot.time)}</strong><em>Available</em>
-      <a href="${EDONET}" target="_blank" rel="noreferrer" title="Open Edonet to book ${escapeHtml(venue.name)} ${escapeHtml(slot.time)}">Book</a>
+      <a href="${EDONET}" data-booking="${booking}" title="Book ${escapeHtml(venue.name)} ${escapeHtml(slot.time)}">Book</a>
     </article>`;
   }).join("") : `<div class="empty">No openings match the selected venues and time.</div>`;
+  $("slots").querySelectorAll("[data-booking]").forEach(link => link.onclick = event => {
+    if (!navigator.userAgent.includes("ShuttleSpotIOS")) return;
+    event.preventDefault();
+    const request = JSON.parse(decodeURIComponent(link.dataset.booking));
+    window.webkit?.messageHandlers?.shuttleSpotBook?.postMessage(request);
+  });
 }
 
 function renderOptions(filter="") {
@@ -163,7 +176,8 @@ async function loadMonth() {
     state.slots = rows.map(row => {
       const venue = venues.find(item=>item.japanese===row.facility);
       return venue ? {
-        day:Number(row.date.slice(-2)), venue:venue.id, period:row.time_period || "day",
+        date:row.date, day:Number(row.date.slice(-2)), venue:venue.id, period:row.time_period || "day",
+        start:row.slot_start?.slice(0,5), end:row.slot_end?.slice(0,5),
         time:row.slot_start && row.slot_end ? `${row.slot_start.slice(0,5)}–${row.slot_end.slice(0,5)}` : "Time pending",
         room:row.room,
       } : null;
