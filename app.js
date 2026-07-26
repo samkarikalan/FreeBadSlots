@@ -232,3 +232,7 @@ $("previous").onclick = () => shiftMonth(-1);
 $("next").onclick = () => shiftMonth(1);
 render();
 loadMonth();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+}
