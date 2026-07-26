@@ -112,7 +112,7 @@ function renderSlots() {
     return `<article style="--v:${venue.color}">
       <i></i><div><h3>${escapeHtml(venue.name)}</h3><p>${escapeHtml(slot.room)}</p></div>
       <strong>${escapeHtml(slot.time)}</strong><em>Available</em>
-      <a href="${EDONET}" target="_blank" rel="noreferrer">View</a>
+      <a href="${EDONET}" target="_blank" rel="noreferrer" title="Open Edonet to book ${escapeHtml(venue.name)} ${escapeHtml(slot.time)}">Book</a>
     </article>`;
   }).join("") : `<div class="empty">No openings match the selected venues and time.</div>`;
 }
