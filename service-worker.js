@@ -1,4 +1,4 @@
-const CACHE = "shuttle-spot-v2-mobile-collapse";
+const CACHE = "shuttle-spot-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

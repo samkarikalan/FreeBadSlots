@@ -20,6 +20,7 @@ const state = {
   day: 27,
   period: "all",
   selected: new Set(venues.map(v=>v.id)),
+  venuesExpanded: false,
   slots: [],
 };
 const $ = id => document.getElementById(id);
@@ -70,16 +71,27 @@ function renderPeriods() {
 
 function renderVenues() {
   const selected = venues.filter(venue => state.selected.has(venue.id));
+  const visible = state.venuesExpanded ? selected : selected.slice(0,3);
   $("selected-count").textContent = selected.length === venues.length ? "All venues selected" : `${selected.length} venues selected`;
-  $("chips").innerHTML = selected.slice(0,4).map(venue =>
+  $("chips").classList.toggle("expanded", state.venuesExpanded);
+  $("chips").innerHTML = visible.map(venue =>
     `<button data-id="${venue.id}" style="--v:${venue.color}"><b>✓</b>${escapeHtml(venue.name)}</button>`
-  ).join("") + (selected.length > 4 ? `<span>+${selected.length - 4}</span>` : "") +
+  ).join("") + (!state.venuesExpanded && selected.length > 3 ? `<button class="more-venues" id="more-venues">+${selected.length - 3}</button>` : "") +
     (selected.length ? "" : `<button class="choose" id="choose">Select venues</button>`);
   $("chips").querySelectorAll("[data-id]").forEach(button => button.onclick = () => toggleVenue(Number(button.dataset.id)));
+  if ($("more-venues")) $("more-venues").onclick = toggleVenueExpansion;
   if ($("choose")) $("choose").onclick = openSheet;
+  $("venue-toggle").textContent = state.venuesExpanded ? "⌃" : "⌄";
+  $("venue-toggle").setAttribute("aria-expanded", String(state.venuesExpanded));
+  $("venue-toggle").setAttribute("aria-label", state.venuesExpanded ? "Collapse venues" : "Expand venues");
   $("legend").innerHTML = selected.slice(0,7).map(venue =>
     `<span><i style="background:${venue.color}"></i>${escapeHtml(venue.name)}</span>`
   ).join("");
+}
+
+function toggleVenueExpansion() {
+  state.venuesExpanded = !state.venuesExpanded;
+  renderVenues();
 }
 
 function renderCalendar() {
@@ -92,11 +104,7 @@ function renderCalendar() {
   let html = Array.from({length:leading},()=>`<span class="blank"></span>`).join("");
   for (let day=1; day<=lastDay; day++) {
     const ids = [...new Set(slots.filter(slot=>slot.day===day).map(slot=>slot.venue))];
-    const visibleIds = ids.length > 3 ? ids.slice(0,2) : ids.slice(0,3);
-    const extra = ids.length > 3 ? `<em class="more-dots">+${ids.length - 2}</em>` : "";
-    const indicators = visibleIds.map(id=>`<i style="background:${venues[id].color}"></i>`).join("") + extra;
-    const availabilityLabel = ids.length ? `${ids.length} venue${ids.length === 1 ? "" : "s"} available` : "No venues available";
-    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}" aria-label="${day}, ${availabilityLabel}"><b>${day}</b><span>${indicators}</span></button>`;
+    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}"><b>${day}</b><span>${ids.map(id=>`<i style="background:${venues[id].color}"></i>`).join("")}</span></button>`;
   }
   $("days").innerHTML = html;
   $("days").querySelectorAll("button").forEach(button => button.onclick = () => {
@@ -158,16 +166,6 @@ function render() {
   renderCalendar();
   renderSlots();
 }
-
-function setupCollapsible(cardId, toggleId) {
-  const card = $(cardId);
-  const toggle = $(toggleId);
-  toggle.onclick = () => {
-    const collapsed = card.classList.toggle("collapsed");
-    toggle.setAttribute("aria-expanded", String(!collapsed));
-  };
-}
-
 function openSheet() {
   $("backdrop").classList.remove("hidden");
   renderOptions();
@@ -234,10 +232,9 @@ function shiftMonth(amount) {
   loadMonth();
 }
 
-setupCollapsible("venues-card", "venues-toggle");
-setupCollapsible("calendar-card", "calendar-toggle");
 $("refresh").onclick = requestScan;
 $("manage").onclick = openSheet;
+$("venue-toggle").onclick = toggleVenueExpansion;
 $("close").onclick = closeSheet;
 $("done").onclick = closeSheet;
 $("backdrop").onclick = event => { if (event.target === $("backdrop")) closeSheet(); };
