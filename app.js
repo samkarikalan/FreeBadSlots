@@ -104,7 +104,11 @@ function renderCalendar() {
   let html = Array.from({length:leading},()=>`<span class="blank"></span>`).join("");
   for (let day=1; day<=lastDay; day++) {
     const ids = [...new Set(slots.filter(slot=>slot.day===day).map(slot=>slot.venue))];
-    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}"><b>${day}</b><span>${ids.map(id=>`<i style="background:${venues[id].color}"></i>`).join("")}</span></button>`;
+    const visibleIds = ids.slice(0, 3);
+    const hiddenCount = Math.max(0, ids.length - visibleIds.length);
+    const markers = visibleIds.map(id=>`<i style="background:${venues[id].color}"></i>`).join("") +
+      (hiddenCount ? `<small class="more-dots" aria-label="${hiddenCount} more venue${hiddenCount === 1 ? "" : "s"}">+</small>` : "");
+    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}" aria-label="${day}${ids.length ? `, ${ids.length} venue${ids.length === 1 ? "" : "s"} available` : ""}"><b>${day}</b><span class="date-markers">${markers}</span></button>`;
   }
   $("days").innerHTML = html;
   $("days").querySelectorAll("button").forEach(button => button.onclick = () => {
