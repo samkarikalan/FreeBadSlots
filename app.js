@@ -92,7 +92,11 @@ function renderCalendar() {
   let html = Array.from({length:leading},()=>`<span class="blank"></span>`).join("");
   for (let day=1; day<=lastDay; day++) {
     const ids = [...new Set(slots.filter(slot=>slot.day===day).map(slot=>slot.venue))];
-    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}"><b>${day}</b><span>${ids.map(id=>`<i style="background:${venues[id].color}"></i>`).join("")}</span></button>`;
+    const visibleIds = ids.length > 3 ? ids.slice(0,2) : ids.slice(0,3);
+    const extra = ids.length > 3 ? `<em class="more-dots">+${ids.length - 2}</em>` : "";
+    const indicators = visibleIds.map(id=>`<i style="background:${venues[id].color}"></i>`).join("") + extra;
+    const availabilityLabel = ids.length ? `${ids.length} venue${ids.length === 1 ? "" : "s"} available` : "No venues available";
+    html += `<button class="date ${state.day===day?"selected":""}" data-day="${day}" aria-label="${day}, ${availabilityLabel}"><b>${day}</b><span>${indicators}</span></button>`;
   }
   $("days").innerHTML = html;
   $("days").querySelectorAll("button").forEach(button => button.onclick = () => {
@@ -154,6 +158,16 @@ function render() {
   renderCalendar();
   renderSlots();
 }
+
+function setupCollapsible(cardId, toggleId) {
+  const card = $(cardId);
+  const toggle = $(toggleId);
+  toggle.onclick = () => {
+    const collapsed = card.classList.toggle("collapsed");
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+  };
+}
+
 function openSheet() {
   $("backdrop").classList.remove("hidden");
   renderOptions();
@@ -220,6 +234,8 @@ function shiftMonth(amount) {
   loadMonth();
 }
 
+setupCollapsible("venues-card", "venues-toggle");
+setupCollapsible("calendar-card", "calendar-toggle");
 $("refresh").onclick = requestScan;
 $("manage").onclick = openSheet;
 $("close").onclick = closeSheet;
